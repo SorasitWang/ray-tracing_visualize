@@ -1,7 +1,12 @@
+#ifndef UTIL_H
+#define UTIL_H
 #include <vector>
 using namespace std;
 class Util {
 public :
+    static string vec3ToString(glm::vec3 value,string interval=" ") {
+        return to_string(value.x) + interval + to_string(value.y) + interval + to_string(value.z) + interval;
+    }
 	static vector<float> getCubeVertexData() {
         vector<float> vertices = {
             // back face
@@ -49,5 +54,7 @@ public :
         };
        return vertices;
 	}
- 
+
+    
 };
+#endif //!UTIL_H

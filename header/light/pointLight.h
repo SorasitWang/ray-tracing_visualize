@@ -13,18 +13,18 @@
 using namespace std;
 
 struct PointLightProp {
-	float constant;
-	float linear;
-	float quadratic;
+	float constant=1.0f;
+	float linear = 1.0f;
+	float quadratic = 1.0f;
 };
-class PointLight : Light
+class PointLight : public Light
 {
 public:
-	
+	PointLightProp pointLightProp;
 	glm::vec3 position;
 	PointLight(glm::vec3 pos) : Light() {
 		this->position = pos;
-		shader = new Shader("../shader/plainColor.vs", "../shader/plainColor.fs");
+		shader = new Shader("./header/shader/plainColor.vs", "./header/shader/plainColor.fs");
 		this->genVAO();
 		this->setPointLightProp(1, 1, 1);
 	};
@@ -40,7 +40,7 @@ public:
 private:
 	unsigned int VAO, VBO;
 	Shader* shader;
-	PointLightProp pointLightProp;
+	
 
 	void genVAO();
 };

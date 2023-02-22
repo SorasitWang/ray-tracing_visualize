@@ -12,6 +12,8 @@
 #include "../header/object/cube.h"
 #include "../header/object/sphere.h"
 #include "../header/object/quad.h"
+#include "../header/light/pointLight.h"
+#include "../header/ray/tracingRay.h"
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -72,13 +74,41 @@ int main()
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    Cube* cube = new Cube();
+    Cube* cube2 = new Cube();
+    Sphere* sphere = new Sphere();
+    PointLight* pointLight = new PointLight(glm::vec3(6));
+    PointLight* pointLight2 = new PointLight(glm::vec3(5,3,0));
+    pointLight2->setLightProp(glm::vec3(50,100,50), glm::vec3(50, 100, 50), glm::vec3(50, 100, 50));
+    glm::mat4 t = glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.5, 0));
+    glm::mat4 r = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 1));
+    glm::mat4 s(1.0f);
+    cube->updateTransformMatrix(t, r, s);
+    t = glm::translate(glm::mat4(1.0f), pointLight->position);
+    cube2->updateTransformMatrix(t, glm::mat4(1.0f), glm::mat4(1.0f));
     vector<Object*> objs;
-    objs.push_back(new Sphere());
-    objs.push_back(new Cube());
-    for (auto obj : objs)
-        cout << obj->hello() << endl;
+    objs.push_back(cube);
+    objs.push_back(cube2);
+    vector<PointLight*> lights;
+    lights.push_back(pointLight);
+    lights.push_back(pointLight2);
 
 
+    Ray ray = Ray(glm::vec3(10,2,0),glm::vec3(-1,0,0));
+    float dist;
+    glm::vec3 normal;
+    bool is = cube->isIntersect(ray, dist, normal);
+    glm::vec3 intersectedPoint = ray.origin + ray.dir * dist;
+    Ray rayNormal = Ray(intersectedPoint, normal);
+    t = glm::translate(glm::mat4(1.0f), intersectedPoint);
+    r = glm::mat4(1.0f);
+    s = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+    sphere->updateTransformMatrix(t, r, s);
+
+    TracingRay tRay = TracingRay(nullptr, 1, 1, ray.origin, ray.dir);
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic
@@ -95,9 +125,12 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
-        //cube.draw(projection,view);
-
-
+        for (Object* obj : objs)
+            obj->draw(projection, view);
+        for (PointLight* light : lights)
+            light->draw(projection, view);
+        /*sphere->draw(projection, view);*/
+        tRay.trace(objs,lights,camera.Position,projection,view);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

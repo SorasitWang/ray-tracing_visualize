@@ -15,11 +15,13 @@ using namespace std;
 
 struct Material
 {
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
-	float shininess;
-	float index;
+	glm::vec3 ambient = glm::vec3(0.4f,0.1f,0.1f);
+	glm::vec3 diffuse = glm::vec3(0.4f, 0.1f, 0.1f);
+	glm::vec3 specular = glm::vec3(0.4f, 0.1f, 0.1f);
+	int shininess = 16;
+	float index = 1.0f;
+	float reflectCoeff = 0.0f;
+	float refractCoeff = 0.0f;
 };
 class Object 
 {
@@ -36,6 +38,7 @@ public :
 		this->min = glm::vec3(10000);
 		/*this->shader = new Shader("../shader/phong.vs", "../shader/phong.fs");*/
 		this->shader = new Shader("./header/shader/plainColor.vs", "./header/shader/plainColor.fs");
+		this->updateTransformMatrix(glm::mat4(1.0f), glm::mat4(1.0f), glm::mat4(1.0f));
 
 	};
 	~Object() {};
@@ -44,9 +47,10 @@ public :
 
 
 	void updateTransformMatrix(glm::mat4 t,glm::mat4 r,glm::mat4 s);
+	
 	bool isIntersectAABB(Ray ray, float& tNear, float& tFar);
 
-	virtual bool isIntersect(Ray ray,float& distance) = 0;
+	virtual bool isIntersect(Ray ray,float& distance,glm::vec3& normal) = 0;
 	virtual void draw(const glm::mat4& projection, const glm::mat4& view)=0;
 	virtual string hello()=0;
 private :

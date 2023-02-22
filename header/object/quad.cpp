@@ -31,19 +31,26 @@ void Quad::draw(const glm::mat4& projection, const glm::mat4& view) {
     this->shader->use();
     this->shader->setMat4("view", view);
     this->shader->setMat4("projection", projection);
-    this->shader->setMat4("model", glm::mat4(1.0f));
+    this->shader->setMat4("model", this->trs);
     this->shader->setVec3("color", glm::vec3(1, 0, 0));
     glBindVertexArray(this->VAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }
-bool Quad::isIntersect(Ray ray) {
+bool Quad::isIntersect(Ray ray, float& distance, glm::vec3& normal) {
     
-    ray.origin = glm::vec3(this->invTrs * glm::vec4(ray.origin, 1.0f));
-    ray.dir = glm::vec3(this->invTrs * glm::vec4(ray.dir, 1.0f));
+    Ray objRay(glm::vec3(this->invTrs * glm::vec4(ray.origin, 1.0f)), glm::vec3(this->invTrs * glm::vec4(ray.dir, 0.0f)));
+
     float tNear, tFar;
-    // tNear and tFar may too close
-    if (!this->isIntersectAABB(ray, tNear, tFar)) return false;
+    this->isIntersectAABB(objRay, tNear, tFar);
+    // since tNear and tFar may be the same point
+    if (isinf(abs(tFar)))
+        return false;
+
+    // convert back to world space
+    glm::vec3 intersectPoint = ray.origin + ray.dir * tNear;
+    intersectPoint = glm::vec3(this->trs * glm::vec4(intersectPoint, 1.0f));
+    distance = (intersectPoint - ray.origin).length();
 
     return true;
     

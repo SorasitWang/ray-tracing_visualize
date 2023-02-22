@@ -23,8 +23,10 @@ void PointLight::genVAO() {
 
 void PointLight::draw(const glm::mat4& projection, const glm::mat4& view) {
     this->shader->use();
-    this->shader->setVec3("color", this->prop.diffuse);
-    this->shader->setMat4("model", glm::translate(glm::mat4(1.0f), this->position));
+    this->shader->setVec3("color", glm::normalize(this->prop.diffuse));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), this->position);
+    model = glm::scale(model, glm::vec3(0.1f));
+    this->shader->setMat4("model", model);
     this->shader->setMat4("projection", projection);
     this->shader->setMat4("view", view);
     // render Cube

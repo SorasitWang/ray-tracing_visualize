@@ -1,9 +1,10 @@
 #include "object.h"
 
 void Object::updateAABB() {
-	for (unsigned int i = 0; i < this->vertexData.size() / 9; i += 9) {
+	for (unsigned int i = 0; i < this->vertexData.size(); i += 8) {
 		this->min = glm::min(this->min, glm::vec3(this->vertexData[i], this->vertexData[i+1], this->vertexData[i+2]));
 		this->max = glm::max(this->max, glm::vec3(this->vertexData[i], this->vertexData[i + 1], this->vertexData[i + 2]));
+		
 	}
 }
 

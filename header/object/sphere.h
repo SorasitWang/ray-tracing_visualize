@@ -14,7 +14,7 @@ public:
 		this->genVertexData();
 	};
 	~Sphere() {};
-	virtual bool isIntersect(Ray ray, float& distance);
+	virtual bool isIntersect(Ray ray, float& distance, glm::vec3& normal);
 	void draw(const glm::mat4& projection, const glm::mat4& view);
 	string hello() {
 		return "sphere";

@@ -103,5 +103,14 @@
     <None Include="header\shader\phong.fs">
       <Filter>Header Files\shader</Filter>
     </None>
+    <None Include="header\shader\line.fs">
+      <Filter>Header Files\shader</Filter>
+    </None>
+    <None Include="header\shader\line.gs">
+      <Filter>Header Files\shader</Filter>
+    </None>
+    <None Include="header\shader\line.vs">
+      <Filter>Header Files\shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

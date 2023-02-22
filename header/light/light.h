@@ -12,19 +12,19 @@
 using namespace std;
 
 struct LightProperty {
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
+	glm::vec3 ambient = glm::vec3(100.0f, 100.0f, 100.0f);;
+	glm::vec3 diffuse = glm::vec3(100.0f, 100.0f, 100.0f);;
+	glm::vec3 specular = glm::vec3(100.0f, 100.0f, 100.0f);;
 };
 class Light
 {
 public:
-	
-	
 	LightProperty prop;
+	
+	
 	Light() {
 		this->prop = LightProperty();
-		this->setLightProp(glm::vec3(0.3f), glm::vec3(0.3f), glm::vec3(0.3f));
+		//this->setLightProp(glm::vec3(0.3f), glm::vec3(0.3f), glm::vec3(0.3f));
 		
 	};
 	~Light() {};
@@ -37,6 +37,8 @@ public:
 
 
 private:
+
+protected:
 	
 
 };

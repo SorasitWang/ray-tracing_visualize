@@ -166,6 +166,9 @@
     <ClCompile Include="src\Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="header\shader\line.fs" />
+    <None Include="header\shader\line.gs" />
+    <None Include="header\shader\line.vs" />
     <None Include="header\shader\phong.fs" />
     <None Include="header\shader\phong.vs" />
     <None Include="header\shader\plainColor.fs" />
