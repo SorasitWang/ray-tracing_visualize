@@ -27,23 +27,19 @@ void Cube::genVertexData() {
   
     
 }
-void Cube::draw(const glm::mat4& projection, const glm::mat4& view) {
+void Cube::draw() {
     // render Cube
-    this->shader->use();
-    this->shader->setMat4("view", view);
-    this->shader->setMat4("projection", projection);
-    this->shader->setMat4("model", this->trs);
-    this->shader->setVec3("color", glm::vec3(1, 0, 0));
     glBindVertexArray(this->VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
 }
-bool Cube::isIntersect(Ray ray,float& distance,glm::vec3& normal) {
+
+bool Cube::isIntersect(Ray ray,float& tNear,float &tFar,glm::vec3& normal) {
     Ray objRay(glm::vec3(this->invTrs * glm::vec4(ray.origin, 1.0f)), glm::vec3(this->invTrs * glm::vec4(ray.dir, 0.0f)));
-    float tNear, tFar;
+    float _tNear, _tFar;
     // Since Cube is equal to AABB
-    if (!this->isIntersectAABB(objRay,tNear,tFar)) return false;
-    glm::vec3 objIntersectPoint = objRay.origin + objRay.dir * tNear;
+    if (!this->isIntersectAABB(objRay,_tNear,_tFar)) return false;
+    glm::vec3 objIntersectPoint = objRay.origin + objRay.dir * _tNear;
     //cout << objIntersectPoint.x << " " << objIntersectPoint.y << " " << objIntersectPoint.z << endl;
     if (abs(objIntersectPoint.x) - 1 < 1e-4) {
         normal = glm::vec3(glm::sign(objIntersectPoint.x), 0, 0);
@@ -58,6 +54,7 @@ bool Cube::isIntersect(Ray ray,float& distance,glm::vec3& normal) {
     // convert back to world space
      glm::vec3 intersectPoint = glm::vec3(this->trs * glm::vec4(objIntersectPoint, 1.0f));
     //distance = (intersectPoint-ray.origin).length();
-    distance = tNear;
+    tNear = _tNear;
+    tFar = _tFar;
     return true;
 }

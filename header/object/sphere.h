@@ -14,15 +14,15 @@ public:
 		this->genVertexData();
 	};
 	~Sphere() {};
-	virtual bool isIntersect(Ray ray, float& distance, glm::vec3& normal);
-	void draw(const glm::mat4& projection, const glm::mat4& view);
+	virtual bool isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal);
+	void draw();
 	string hello() {
 		return "sphere";
 	}
 private:
 	float radius;
 	unsigned int stackCount, sectorCount, EBO;
-	vector<float> vertices, normals, texCoords, vertexData;
+	vector<float> vertices, normals, texCoords;
 	vector<int> indices;
 	virtual void genVertexData();
 	void buildVerticesSmooth();

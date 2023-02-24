@@ -112,5 +112,20 @@
     <None Include="header\shader\line.vs">
       <Filter>Header Files\shader</Filter>
     </None>
+    <None Include="header\shader\depthMap.fs">
+      <Filter>Header Files\shader</Filter>
+    </None>
+    <None Include="header\shader\depthMap.vs">
+      <Filter>Header Files\shader</Filter>
+    </None>
+    <None Include="header\shader\depthCubeMap.vs">
+      <Filter>Header Files\shader</Filter>
+    </None>
+    <None Include="header\shader\depthCubeMap.gs">
+      <Filter>Header Files\shader</Filter>
+    </None>
+    <None Include="header\shader\depthCubeMap.fs">
+      <Filter>Header Files\shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

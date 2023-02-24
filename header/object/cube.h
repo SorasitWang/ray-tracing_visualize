@@ -10,8 +10,12 @@ public:
 		this->genVertexData();
 	};
 	~Cube() {};
-	virtual bool isIntersect(Ray ray, float& distance,glm::vec3& normal);
-	void draw(const glm::mat4& projection, const glm::mat4& view);
+	virtual bool isIntersect(Ray ray, float& distance, float& tFar, glm::vec3& normal);
+	void draw();
+	void drawPhong(const vector<PointLight*>* pointLights, const glm::vec3& viewPos, const glm::mat4& projection, const glm::mat4& view) {
+		this->setPhongUniform(pointLights, viewPos, projection, view);
+		this->draw();
+	}
 	string hello() {
 		return "cube" ;
 	}

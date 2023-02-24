@@ -9,13 +9,15 @@
 #include <glm/glm/gtc/type_ptr.hpp>
 #include <string>
 #include "../util.h"
+
 using namespace std;
 
 struct LightProperty {
-	glm::vec3 ambient = glm::vec3(100.0f, 100.0f, 100.0f);;
+	glm::vec3 ambient = glm::vec3(10.0f, 10.0f, 10.0f);;
 	glm::vec3 diffuse = glm::vec3(100.0f, 100.0f, 100.0f);;
-	glm::vec3 specular = glm::vec3(100.0f, 100.0f, 100.0f);;
+	glm::vec3 specular = glm::vec3(10.0f, 10.0f, 10.0f);;
 };
+
 class Light
 {
 public:
@@ -33,8 +35,7 @@ public:
 		this->prop.diffuse = diffuse;
 		this->prop.specular = specular;
 	}
-
-
+	//unsigned int renderDepthMap(vector<glm::mat4>& models);
 
 private:
 

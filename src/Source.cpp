@@ -18,7 +18,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
-
+void draw();
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -32,7 +32,12 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+float step = 0.0f;
 
+vector<Object*> objs;
+vector<PointLight*> lights;
+TracingRay* ray;
+vector<unsigned int> depthMaps;
 int main()
 {
     // glfw: initialize and configure
@@ -81,34 +86,32 @@ int main()
     Cube* cube2 = new Cube();
     Sphere* sphere = new Sphere();
     PointLight* pointLight = new PointLight(glm::vec3(6));
-    PointLight* pointLight2 = new PointLight(glm::vec3(5,3,0));
+    PointLight* pointLight2 = new PointLight(glm::vec3(3,2,0));
     pointLight2->setLightProp(glm::vec3(50,100,50), glm::vec3(50, 100, 50), glm::vec3(50, 100, 50));
     glm::mat4 t = glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.5, 0));
     glm::mat4 r = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 1));
     glm::mat4 s(1.0f);
-    cube->updateTransformMatrix(t, r, s);
+    //cube->updateTransformMatrix(t, r, s);
+    cube->setMaterial("reflectCoeff", 0.3f);
+    cube->setMaterial("index", 1.6f);
+    cube->setMaterial("refractCoeff", 0.3f);
     t = glm::translate(glm::mat4(1.0f), pointLight->position);
     cube2->updateTransformMatrix(t, glm::mat4(1.0f), glm::mat4(1.0f));
-    vector<Object*> objs;
+    
     objs.push_back(cube);
-    objs.push_back(cube2);
-    vector<PointLight*> lights;
-    lights.push_back(pointLight);
+    //objs.push_back(cube2);
+    
+    //lights.push_back(pointLight);
     lights.push_back(pointLight2);
 
 
-    Ray ray = Ray(glm::vec3(10,2,0),glm::vec3(-1,0,0));
-    float dist;
-    glm::vec3 normal;
-    bool is = cube->isIntersect(ray, dist, normal);
-    glm::vec3 intersectedPoint = ray.origin + ray.dir * dist;
-    Ray rayNormal = Ray(intersectedPoint, normal);
-    t = glm::translate(glm::mat4(1.0f), intersectedPoint);
-    r = glm::mat4(1.0f);
-    s = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-    sphere->updateTransformMatrix(t, r, s);
+    ray = new TracingRay(nullptr,1,glm::vec3(10,0.5,0),glm::vec3(-1,-0.1,0));
 
-    TracingRay tRay = TracingRay(nullptr, 1, 1, ray.origin, ray.dir);
+   /* unsigned int depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;*/
+
+    
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic
@@ -116,21 +119,27 @@ int main()
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
+        step += deltaTime;
         // input
         // -----
         processInput(window);
-
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = camera.GetViewMatrix();
-        for (Object* obj : objs)
-            obj->draw(projection, view);
-        for (PointLight* light : lights)
-            light->draw(projection, view);
-        /*sphere->draw(projection, view);*/
-        tRay.trace(objs,lights,camera.Position,projection,view);
+        for (PointLight* light : lights) {
+            depthMaps.push_back(light->renderDepthMap());
+           for (Object* obj : objs) {
+               obj->drawDepth(light);
+           }
+        }
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        for (unsigned int i = 0; i < lights.size(); i++) {
+            glActiveTexture(GL_TEXTURE0+i);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, depthMaps[i]);
+        }
+        //glBindTexture(GL_TEXTURE_2D, depthMap);
+        draw();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -192,4 +201,16 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+void draw() {
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    glm::mat4 view = camera.GetViewMatrix();
+    for (Object* obj : objs) {
+        obj->drawPhong(&lights, camera.Position, projection, view);
+    }
+    for (PointLight* light : lights)
+        light->draw(projection, view);
+    /*sphere->draw(projection, view);*/
+    ray->trace(objs, lights, camera.Position, projection, view);
 }

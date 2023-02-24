@@ -89,12 +89,13 @@ void Sphere::buildVerticesSmooth()
 }
 
 void Sphere::concatAllVertexData() {
-    this->vertexData = vector<float>();
+    this->vertexData.clear();
 
     std::size_t i, j;
     std::size_t count = vertices.size();
     for (i = 0, j = 0; i < count; i += 3, j += 2)
     {
+       
         this->vertexData.push_back(vertices[i]);
         this->vertexData.push_back(vertices[i + 1]);
         this->vertexData.push_back(vertices[i + 2]);
@@ -113,8 +114,10 @@ void Sphere::genVertexData() {
     if (this->VAO == 0)
     {
         this->buildVerticesSmooth();
+        this->updateAABB();
+       
     };
-    this->updateAABB();
+    
     glGenVertexArrays(1, &this->VAO);
     glGenBuffers(1, &this->VBO);
     glGenBuffers(1, &this->EBO);
@@ -141,33 +144,49 @@ void Sphere::genVertexData() {
     glBindVertexArray(0);
 
 }
-void Sphere::draw(const glm::mat4& projection, const glm::mat4& view) {
-    // render Cube
-    this->shader->use();
-    this->shader->setMat4("view", view);
-    this->shader->setMat4("projection", projection);
-    this->shader->setMat4("model", this->trs);
-    this->shader->setVec3("color", glm::vec3(1, 0, 0));
+void Sphere::draw() {
     glBindVertexArray(this->VAO);
     // draw a sphere with VBO
     glDrawElements(GL_TRIANGLES,this->indices.size(),GL_UNSIGNED_INT,(void*)0);
     glBindVertexArray(0);
 }
 
-bool Sphere::isIntersect(Ray ray, float& distance, glm::vec3& normal) {
+bool Sphere::isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal) {
     Ray objRay(glm::vec3(this->invTrs * glm::vec4(ray.origin, 1.0f)), glm::vec3(this->invTrs * glm::vec4(ray.dir, 0.0f)));
 
-    float tNear, tFar;
+    float _tNear, _tFar;
     // Since Cube is equal to AABB
-    if (!this->isIntersectAABB(objRay, tNear, tFar)) return false;
+    if (!this->isIntersectAABB(objRay, _tNear, _tFar)) return false;
 
-    glm::vec3 objIntersectPoint = objRay.origin + objRay.dir * tNear;
-    normal = glm::normalize(objIntersectPoint);
-    normal = glm::mat3(glm::transpose(glm::inverse(this->trs))) * normal;
-    glm::vec3 intersectPoint = ray.origin + ray.dir * tNear;
+
+    // Compute the vector between the ray origin and the sphere center
+    glm::vec3 spherePos(this->t[3][0], this->t[3][1], this->t[3][2]);
+    glm::vec3 L = spherePos - ray.origin;
+
+    // Compute the projection of L onto the ray direction vector
+    float tca = glm::dot(L,ray.dir);
+
+    // If tca is negative, the sphere is behind the ray origin and therefore there is no intersection
+    if (tca < 0) {
+        return false;
+    }
+
+    // Compute the distance from the projection point to the sphere center
+    float d2 = glm::dot(L,L) - tca * tca;
+
+    float radius2 = this->radius * this->radius;
+    // If the distance is greater than the sphere radius, the ray does not intersect the sphere
+    if (d2 > radius2) {
+        return false;
+    }
+
+    // Compute the distance from the projection point to the intersection points
+    float thc = sqrt(radius2 - d2);
 
     // convert back to world space
-    intersectPoint = glm::vec3(this->trs * glm::vec4(intersectPoint, 1.0f));
-    distance = (intersectPoint - ray.origin).length();
+    //intersectPoint = glm::vec3(this->trs * glm::vec4(intersectPoint, 1.0f));
+    tNear = (tca - thc);
+    tFar = (tca + thc);
+    normal = glm::normalize(objRay.origin + objRay.dir * tNear);
     return true;
 }

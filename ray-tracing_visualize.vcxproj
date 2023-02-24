@@ -166,6 +166,11 @@
     <ClCompile Include="src\Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="header\shader\depthCubeMap.fs" />
+    <None Include="header\shader\depthCubeMap.gs" />
+    <None Include="header\shader\depthCubeMap.vs" />
+    <None Include="header\shader\depthMap.fs" />
+    <None Include="header\shader\depthMap.vs" />
     <None Include="header\shader\line.fs" />
     <None Include="header\shader\line.gs" />
     <None Include="header\shader\line.vs" />

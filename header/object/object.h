@@ -11,6 +11,7 @@
 #include "../util.h"
 #include "../ray/ray.h"
 #include "../shader.h"
+#include "../light/pointLight.h"
 using namespace std;
 
 struct Material
@@ -18,7 +19,7 @@ struct Material
 	glm::vec3 ambient = glm::vec3(0.4f,0.1f,0.1f);
 	glm::vec3 diffuse = glm::vec3(0.4f, 0.1f, 0.1f);
 	glm::vec3 specular = glm::vec3(0.4f, 0.1f, 0.1f);
-	int shininess = 16;
+	int shininess = 1;
 	float index = 1.0f;
 	float reflectCoeff = 0.0f;
 	float refractCoeff = 0.0f;
@@ -36,8 +37,8 @@ public :
 		this->VBO = 0;
 		this->max = glm::vec3(-10000);
 		this->min = glm::vec3(10000);
-		/*this->shader = new Shader("../shader/phong.vs", "../shader/phong.fs");*/
-		this->shader = new Shader("./header/shader/plainColor.vs", "./header/shader/plainColor.fs");
+		this->shader = new Shader("./header/shader/phong.vs", "./header/shader/phong.fs");
+		//this->shader = new Shader("./header/shader/plainColor.vs", "./header/shader/plainColor.fs");
 		this->updateTransformMatrix(glm::mat4(1.0f), glm::mat4(1.0f), glm::mat4(1.0f));
 
 	};
@@ -49,10 +50,14 @@ public :
 	void updateTransformMatrix(glm::mat4 t,glm::mat4 r,glm::mat4 s);
 	
 	bool isIntersectAABB(Ray ray, float& tNear, float& tFar);
-
-	virtual bool isIntersect(Ray ray,float& distance,glm::vec3& normal) = 0;
-	virtual void draw(const glm::mat4& projection, const glm::mat4& view)=0;
+	void setMaterial(string type, glm::vec3 val);
+	void setMaterial(string type, float val);
+	void setPhongUniform(const vector<PointLight*>* pointLights, const glm::vec3& viewPos, const glm::mat4& projection, const glm::mat4& view);
+	virtual bool isIntersect(Ray ray,float& distance, float& tFar, glm::vec3& normal) = 0;
+	void drawPhong(const vector<PointLight*>* pointLights, const glm::vec3& viewPos, const glm::mat4& projection, const glm::mat4& view);
+	virtual void draw()=0;
 	virtual string hello()=0;
+	void drawDepth(const PointLight* light);
 private :
 
 protected:

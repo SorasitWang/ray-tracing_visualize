@@ -10,8 +10,8 @@ public:
 		this->genVertexData();
 	};
 	~Quad() {};
-	virtual bool isIntersect(Ray ray, float& distance, glm::vec3& normal);
-	void draw(const glm::mat4& projection, const glm::mat4& view);
+	virtual bool isIntersect(Ray ray, float& tNear,float& tFar, glm::vec3& normal);
+	void draw();
 	string hello() {
 		return "quad";
 	}

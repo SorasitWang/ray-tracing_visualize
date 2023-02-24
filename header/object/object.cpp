@@ -43,3 +43,78 @@ bool Object::isInsideAABB(glm::vec3 pos)
 	}
 	return false;
 }
+
+void Object::setMaterial(string type,glm::vec3 val) {
+	if (type == "ambient") {
+		this->material.ambient = val;
+	}
+	else if (type == "diffuse") {
+		this->material.diffuse = val;
+	}
+	else if (type == "specular") {
+		this->material.ambient = val;
+	}
+}
+void Object::setMaterial(string type, float val) {
+	if (type == "shininess") {
+		this->material.shininess = val;
+	}
+	else if (type == "index") {
+		this->material.index = val;
+	}
+	else if (type == "reflectCoeff") {	
+		this->material.reflectCoeff = val;
+	}
+	else if (type == "refractCoeff") {
+		this->material.refractCoeff = val;
+	}
+	if (this->material.refractCoeff + this->material.refractCoeff > 1.0f)
+		cout << "WARNING : reflect + refract coeff should not more than 1" << endl;
+}
+
+void Object::setPhongUniform(const vector<PointLight*>* pointLights,const glm::vec3& viewPos,const glm::mat4& projection,const glm::mat4& view) {
+	this->shader->use();
+	this->shader->setMat4("view", view);
+	this->shader->setVec3("viewPos", viewPos);
+	this->shader->setInt("numPointLight", pointLights->size());
+	for (unsigned int i = 0; i < pointLights->size();i++) {
+		PointLight* l = pointLights->at(i);
+		string index = "pointLights[" + to_string(i) + "].";
+		this->shader->setVec3(index+"ambient",l->prop.ambient);
+		this->shader->setVec3(index + "diffuse", l->prop.diffuse);
+		this->shader->setVec3(index + "specular", l->prop.specular);
+
+		this->shader->setVec3(index + "position", l->position);
+
+		this->shader->setFloat(index + "constant", l->pointLightProp.constant);
+		this->shader->setFloat(index + "linear", l->pointLightProp.linear);
+		this->shader->setFloat(index + "quadratic", l->pointLightProp.quadratic);
+		// reserved 0-2 for diffuse texture
+		this->shader->setInt("shadowMaps[" + to_string(i) + "]", i);
+		this->shader->setMat4("lightSpaceMatrixs[" + to_string(i) + "]", l->lightSpace.lightMatrix[0]);
+		this->shader->setVec3("lightPos[" + to_string(i) + "]", l->position);
+	}
+	this->shader->setFloat("farPlane", pointLights->at(0)->farPlane);
+	this->shader->setVec3("material.ambient", this->material.ambient);
+	this->shader->setVec3("material.diffuse", this->material.diffuse);
+	this->shader->setVec3("material.specular", this->material.specular);
+	this->shader->setFloat("material.shininess", this->material.shininess);
+	this->shader->setMat4("projection", projection);
+	this->shader->setMat4("model", this->trs);
+}
+
+void Object::drawPhong(const vector<PointLight*>* pointLights, const glm::vec3& viewPos, const glm::mat4& projection, const glm::mat4& view) {
+	this->setPhongUniform(pointLights, viewPos, projection, view);
+	this->draw();
+}
+
+void Object::drawDepth(const PointLight* light) {
+		light->depthShader->use();
+		light->depthShader->setVec3("lightPos",  light->position);
+		light->depthShader->setMat4("model", this->trs);
+		for (unsigned int i = 0; i < 6; i++) {
+			light->depthShader->setMat4("shadowMatrices["+to_string(i)+"]", light->lightSpace.lightMatrix[i]);
+		}
+		light->depthShader->setFloat("farPlane", light->farPlane);
+		this->draw();
+}

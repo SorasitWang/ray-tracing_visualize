@@ -30,6 +30,12 @@ public :
 		
 	}
 
+	bool inRange(glm::vec3 pos) {
+		float value = glm::length((pos - this->origin) / this->dir);
+		if (value > this->tMax || value < 0)
+			return false;
+		return true;
+	}
 	void updateVAO() {
 		// reset VAO
 		this->VAO = 0;
@@ -62,6 +68,7 @@ public :
 		
 		if (this->VAO == 0)
 		{
+			//cout << this->prevTMax << " " <<this->tMax << endl;
 			this->vertexData.clear();
 			this->vertexData.push_back(this->origin.x);
 			this->vertexData.push_back(this->origin.y);
@@ -90,6 +97,7 @@ public :
 			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
+		
 		}
 	}
 	void draw(const glm::mat4& projection, const glm::mat4& view,float trans=1.0f) {
@@ -103,12 +111,13 @@ public :
 		glBindVertexArray(0);
 	}
 
-	static glm::vec3 reflectRay(glm::vec3 in, glm::vec3 normal) {
-		return in - 2.0f * normal * glm::dot(in, normal);
-	};
 
-	static float refractAngle(float inAngle, float inIndex, float outIndex) {
-		return glm::asin(inIndex * glm::sin(inAngle) /outIndex);
+	static glm::vec3 refractRay(glm::vec3 i,glm::vec3 n, float inIndex, float outIndex) {
+		//https://physics.stackexchange.com/questions/435512/snells-law-in-vector-form
+		float u = inIndex / outIndex;
+		float ni = glm::dot(n, i);
+		glm::vec3 t = n * sqrtf(1 - pow(u, 2) * (1 - pow(ni, 2))) + u*(i-ni*n);
+		return glm::normalize(t);
 	}
 };
 
