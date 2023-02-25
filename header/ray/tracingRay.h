@@ -22,8 +22,13 @@ public:
 		this->level = leftLevel;
 		this->isIntersect = false;
 		this->mediumIndex = index;
-	}
 
+	}
+	/*static int maxLevel;
+	static void setMaxLevel(int maxLevel) {
+		TracingRay::maxLevel = maxLevel;
+	}*/
+	
 	void extract(glm::vec3 origin, glm::vec3 dir) {
 		if (this->level == 0)
 			return;
@@ -49,7 +54,7 @@ public:
 		return true;
 	}
 
-	glm::vec3 trace(const vector<Object*>& objects, const vector<PointLight*>& lights,glm::vec3& viewPos,const glm::mat4& projection,const glm::mat4& view) {
+	glm::vec3 trace(const vector<Object*>& objects, const vector<PointLight*>& lights,glm::vec3& viewPos,const glm::mat4& projection,const glm::mat4& view,float step) {
 		
 		glm::vec3 localColor(0.0f),reflectColor(0.0f), refractColor(0.0f);
 		float minDis = 1e3;
@@ -92,11 +97,11 @@ public:
 			this->isIntersect = true;
 			glm::vec3 intersectedPoint = this->origin + this->dir * minDis;
 			// trace more rays		
-			if (this->level > 0) {
+			if (this->level <= 1) {
 				if (intersected->material.reflectCoeff != 0.0f) {
 					glm::vec3 reflectDir = glm::reflect(this->dir, normal);
-					TracingRay* relfectRay = new TracingRay(this, this->level - 1, intersectedPoint, reflectDir);
-					reflectColor = relfectRay->trace(objects, lights, viewPos, projection, view);
+					TracingRay* relfectRay = new TracingRay(this, this->level + 1, intersectedPoint, reflectDir);
+					reflectColor = relfectRay->trace(objects, lights, viewPos, projection, view,step);
 					//cout << Util::vec3ToString(reflectDir) << " | " << Util::vec3ToString(intersectedPoint)<< endl;
 				}
 				if (intersected->material.refractCoeff != 0.0f) {
@@ -106,14 +111,14 @@ public:
 						// ray is coming from inside
 						index = 1.0f;
 					}
-					glm::vec3 refractDir = -1.0f * Ray::refractRay(this->dir, normal, this->mediumIndex, index);
-					TracingRay* refractRay = new TracingRay(this, this->level - 1, intersectedPoint, refractDir, intersected->material.index);
-					refractColor = refractRay->trace(objects, lights, viewPos, projection, view);
-					cout << Util::vec3ToString(refractDir) << " " << Util::vec3ToString(intersectedPoint) << " " << refractRay->tMax << endl;
+					glm::vec3 refractDir = Ray::refractRay(this->dir, normal, this->mediumIndex, index);
+					TracingRay* refractRay = new TracingRay(this, this->level + 1, intersectedPoint, refractDir, intersected->material.index);
+					refractColor = refractRay->trace(objects, lights, viewPos, projection, view, step);
+					//cout << Util::vec3ToString(this->dir) << " " << Util::vec3ToString(glm::normalize(refractDir)) << " " << Util::vec3ToString(glm::normalize(normal))<<  endl;
 				}
 			}
 
-			// trace light ray
+			//trace light ray
 			for (PointLight* light : lights) {
 				Ray lightRay = Ray(intersectedPoint, light->position - intersectedPoint);
 				if (this->canReach(lightRay,objects,light->position,intersected)){
@@ -125,7 +130,7 @@ public:
 				else {
 					lightRay.setColor(glm::vec3(0.3f));
 				}
-				lightRay.draw(projection, view, 0.5f);
+				//lightRay.draw(projection, view, 0.5f);
 				
 			}
 			if (underShadow) {
@@ -139,7 +144,12 @@ public:
 		}
 		
 		this->setTMax(minDis);
-		this->draw(projection,view);
+		float drawStep = 0.0f;
+		if (step < this->level)
+			drawStep = 0;
+		else
+			drawStep = min(1.0f, step - this->level);
+		this->draw(projection,view, drawStep);
 		return this->color;
 	}
 

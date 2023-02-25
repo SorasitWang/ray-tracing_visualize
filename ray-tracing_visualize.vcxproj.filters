@@ -89,6 +89,9 @@
     <ClCompile Include="header\light\pointLight.cpp">
       <Filter>Header Files\light</Filter>
     </ClCompile>
+    <ClCompile Include="header\ray\tracingRay.cpp">
+      <Filter>Header Files\ray</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="header\shader\plainColor.fs">

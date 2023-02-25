@@ -163,6 +163,7 @@
     <ClCompile Include="header\object\object.cpp" />
     <ClCompile Include="header\object\quad.cpp" />
     <ClCompile Include="header\object\sphere.cpp" />
+    <ClCompile Include="header\ray\tracingRay.cpp" />
     <ClCompile Include="src\Source.cpp" />
   </ItemGroup>
   <ItemGroup>

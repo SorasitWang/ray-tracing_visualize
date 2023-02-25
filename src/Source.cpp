@@ -92,8 +92,8 @@ int main()
     glm::mat4 r = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 1));
     glm::mat4 s(1.0f);
     //cube->updateTransformMatrix(t, r, s);
-    cube->setMaterial("reflectCoeff", 0.3f);
-    cube->setMaterial("index", 1.6f);
+    //cube->setMaterial("reflectCoeff", 0.3f);
+    cube->setMaterial("index", 1.9f);
     cube->setMaterial("refractCoeff", 0.3f);
     t = glm::translate(glm::mat4(1.0f), pointLight->position);
     cube2->updateTransformMatrix(t, glm::mat4(1.0f), glm::mat4(1.0f));
@@ -105,13 +105,12 @@ int main()
     lights.push_back(pointLight2);
 
 
-    ray = new TracingRay(nullptr,1,glm::vec3(10,0.5,0),glm::vec3(-1,-0.1,0));
-
+    ray = new TracingRay(nullptr,0,glm::vec3(10,0.5,0),glm::vec3(-1,-0.1,0));
+    //TracingRay::setMaxLevel(1);
    /* unsigned int depthMapFBO;
     glGenFramebuffers(1, &depthMapFBO);
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;*/
 
-    
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic
@@ -207,10 +206,10 @@ void draw() {
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     glm::mat4 view = camera.GetViewMatrix();
     for (Object* obj : objs) {
-        obj->drawPhong(&lights, camera.Position, projection, view);
+        //obj->drawPhong(&lights, camera.Position, projection, view);
     }
     for (PointLight* light : lights)
         light->draw(projection, view);
     /*sphere->draw(projection, view);*/
-    ray->trace(objs, lights, camera.Position, projection, view);
+    ray->trace(objs, lights, camera.Position, projection, view,step);
 }
