@@ -19,6 +19,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 void draw();
+void deleteAll();
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -92,7 +93,7 @@ int main()
     glm::mat4 r = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 1));
     glm::mat4 s(1.0f);
     //cube->updateTransformMatrix(t, r, s);
-    //cube->setMaterial("reflectCoeff", 0.3f);
+    cube->setMaterial("reflectCoeff", 0.3f);
     cube->setMaterial("index", 1.9f);
     cube->setMaterial("refractCoeff", 0.3f);
     t = glm::translate(glm::mat4(1.0f), pointLight->position);
@@ -118,12 +119,12 @@ int main()
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        step += deltaTime;
+        step += deltaTime/2.0f;
         // input
         // -----
         processInput(window);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
+        glClearColor(0.f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         for (PointLight* light : lights) {
             depthMaps.push_back(light->renderDepthMap());
@@ -137,12 +138,11 @@ int main()
             glActiveTexture(GL_TEXTURE0+i);
             glBindTexture(GL_TEXTURE_CUBE_MAP, depthMaps[i]);
         }
-        //glBindTexture(GL_TEXTURE_2D, depthMap);
         draw();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
+    //deleteAll();
     glfwTerminate();
     return 0;
 }
@@ -206,10 +206,22 @@ void draw() {
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     glm::mat4 view = camera.GetViewMatrix();
     for (Object* obj : objs) {
-        //obj->drawPhong(&lights, camera.Position, projection, view);
+        obj->drawPhong(&lights, camera.Position, projection, view);
     }
     for (PointLight* light : lights)
         light->draw(projection, view);
     /*sphere->draw(projection, view);*/
     ray->trace(objs, lights, camera.Position, projection, view,step);
+}
+
+void deleteAll() {
+   for (unsigned int i = 0; i < objs.size();i++) {
+        delete objs[i];
+   }
+
+   for (unsigned int i = 0; i < lights.size(); i++) {
+       delete lights[i];
+   }
+   delete ray;
+
 }

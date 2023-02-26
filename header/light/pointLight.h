@@ -42,7 +42,12 @@ public:
 		this->farPlane = 50.0f;
 		this->nearPlane = 0.1f;
 	};
-	~PointLight() {};
+	~PointLight() {
+		glDeleteVertexArrays(1, &this->VAO);
+		glDeleteBuffers(1, &this->VBO);
+		delete this->lightSpace.lightMatrix;
+		
+	};
 
 	void setPointLightProp(float constant,float linear,float quadratic) {
 		this->pointLightProp.constant = constant;

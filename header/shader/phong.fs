@@ -90,7 +90,7 @@ void main()
 
     
     
-    FragColor = vec4(result, 0.1);
+    FragColor = vec4(result, 1);
 }
 
 

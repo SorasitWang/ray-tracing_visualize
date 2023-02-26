@@ -13,7 +13,9 @@ public:
 		this->sectorCount = sectorCount;
 		this->genVertexData();
 	};
-	~Sphere() {};
+	~Sphere() {
+		glDeleteBuffers(1,&this->EBO);
+	};
 	virtual bool isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal);
 	void draw();
 	string hello() {

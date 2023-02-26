@@ -35,12 +35,9 @@ public:
 		this->prop.diffuse = diffuse;
 		this->prop.specular = specular;
 	}
+
 	//unsigned int renderDepthMap(vector<glm::mat4>& models);
 
-private:
-
-protected:
-	
 
 };
 #endif //!LIGHT_H

@@ -150,7 +150,6 @@
     <ClInclude Include="header\object\quad.h" />
     <ClInclude Include="header\object\sphere.h" />
     <ClInclude Include="header\ray\ray.h" />
-    <ClInclude Include="header\ray\raytracer.h" />
     <ClInclude Include="header\ray\tracingRay.h" />
     <ClInclude Include="header\shader.h" />
     <ClInclude Include="header\stb_image.h" />
@@ -163,6 +162,7 @@
     <ClCompile Include="header\object\object.cpp" />
     <ClCompile Include="header\object\quad.cpp" />
     <ClCompile Include="header\object\sphere.cpp" />
+    <ClCompile Include="header\ray\ray.cpp" />
     <ClCompile Include="header\ray\tracingRay.cpp" />
     <ClCompile Include="src\Source.cpp" />
   </ItemGroup>

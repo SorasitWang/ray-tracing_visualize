@@ -34,7 +34,7 @@ void Cube::draw() {
     glBindVertexArray(0);
 }
 
-bool Cube::isIntersect(Ray ray,float& tNear,float &tFar,glm::vec3& normal) {
+bool Cube::isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal) {
     Ray objRay(glm::vec3(this->invTrs * glm::vec4(ray.origin, 1.0f)), glm::vec3(this->invTrs * glm::vec4(ray.dir, 0.0f)));
     float _tNear, _tFar;
     // Since Cube is equal to AABB

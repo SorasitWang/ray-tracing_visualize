@@ -118,3 +118,28 @@ void Object::drawDepth(const PointLight* light) {
 		light->depthShader->setFloat("farPlane", light->farPlane);
 		this->draw();
 }
+
+bool Object::isIntersectFiltered(Ray ray, float& distance, glm::vec3& normal) {
+	glm::vec3 tmpNormal;
+	float tNear, tFar;
+	if (this->isIntersect(ray, tNear, tFar, tmpNormal)) {
+		// from surface to outside or to inside
+		if (abs(tNear) < 1e-4 || abs(tFar) < 1e-4) {
+			if (abs(tFar) < 1e-4) {
+				return false;
+			}
+			// inside
+			else {
+				distance = tFar;
+			}
+
+		}
+		else
+		{
+			distance = tNear;
+		}
+		normal = tmpNormal;		
+		return true;
+	}
+	return false;
+}

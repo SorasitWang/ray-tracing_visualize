@@ -42,7 +42,10 @@ public :
 		this->updateTransformMatrix(glm::mat4(1.0f), glm::mat4(1.0f), glm::mat4(1.0f));
 
 	};
-	~Object() {};
+	~Object() {
+		glDeleteVertexArrays(1, &this->VAO);
+		glDeleteBuffers(1, &this->VBO);
+	};
 	vector<float> vertexData;
 	vector<glm::vec3> vertexWorldPos;
 
@@ -53,7 +56,8 @@ public :
 	void setMaterial(string type, glm::vec3 val);
 	void setMaterial(string type, float val);
 	void setPhongUniform(const vector<PointLight*>* pointLights, const glm::vec3& viewPos, const glm::mat4& projection, const glm::mat4& view);
-	virtual bool isIntersect(Ray ray,float& distance, float& tFar, glm::vec3& normal) = 0;
+	bool isIntersectFiltered(Ray ray, float& distance, glm::vec3& normal);
+	virtual bool isIntersect(Ray ray,float& tNear, float& tFar, glm::vec3& normal) = 0;
 	void drawPhong(const vector<PointLight*>* pointLights, const glm::vec3& viewPos, const glm::mat4& projection, const glm::mat4& view);
 	virtual void draw()=0;
 	virtual string hello()=0;

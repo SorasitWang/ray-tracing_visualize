@@ -60,9 +60,6 @@
     <ClInclude Include="header\ray\ray.h">
       <Filter>Header Files\ray</Filter>
     </ClInclude>
-    <ClInclude Include="header\ray\raytracer.h">
-      <Filter>Header Files\ray</Filter>
-    </ClInclude>
     <ClInclude Include="header\ray\tracingRay.h">
       <Filter>Header Files\ray</Filter>
     </ClInclude>
@@ -90,6 +87,9 @@
       <Filter>Header Files\light</Filter>
     </ClCompile>
     <ClCompile Include="header\ray\tracingRay.cpp">
+      <Filter>Header Files\ray</Filter>
+    </ClCompile>
+    <ClCompile Include="header\ray\ray.cpp">
       <Filter>Header Files\ray</Filter>
     </ClCompile>
   </ItemGroup>
