@@ -1,6 +1,6 @@
 # ray-tracing_visualize
 
-Visualizie ray-tracing by representing sampling ray with line.
+Visualize ray-tracing by representing sampling ray with line.
 
 - Trace light ray (shadow ray) to check whether this fragment can reach the light source.
 - Set object's material : 
