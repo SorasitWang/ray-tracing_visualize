@@ -44,9 +44,7 @@ public:
 	};
 	~PointLight() {
 		glDeleteVertexArrays(1, &this->VAO);
-		glDeleteBuffers(1, &this->VBO);
-		delete this->lightSpace.lightMatrix;
-		
+		glDeleteBuffers(1, &this->VBO);	
 	};
 
 	void setPointLightProp(float constant,float linear,float quadratic) {

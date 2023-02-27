@@ -16,7 +16,7 @@ public:
 	~Sphere() {
 		glDeleteBuffers(1,&this->EBO);
 	};
-	virtual bool isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal);
+	virtual bool isIntersect(Ray ray, float& distance, glm::vec3& normal);
 	void draw();
 	string hello() {
 		return "sphere";

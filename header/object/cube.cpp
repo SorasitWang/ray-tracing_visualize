@@ -34,12 +34,28 @@ void Cube::draw() {
     glBindVertexArray(0);
 }
 
-bool Cube::isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal) {
+bool Cube::isIntersect(Ray ray, float& distance, glm::vec3& normal) {
     Ray objRay(glm::vec3(this->invTrs * glm::vec4(ray.origin, 1.0f)), glm::vec3(this->invTrs * glm::vec4(ray.dir, 0.0f)));
     float _tNear, _tFar;
+    int signNormal = 1;
     // Since Cube is equal to AABB
     if (!this->isIntersectAABB(objRay,_tNear,_tFar)) return false;
-    glm::vec3 objIntersectPoint = objRay.origin + objRay.dir * _tNear;
+    if (abs(_tNear) < 1e-4 || abs(_tFar) < 1e-4) {
+        if (abs(_tFar) < 1e-4) {
+            return false;
+        }
+        // inside
+        else {
+            distance = _tFar;
+            signNormal = -1;
+        }
+    }
+    else
+    {
+        distance = _tNear;
+    }
+
+    glm::vec3 objIntersectPoint = objRay.origin + objRay.dir * distance;
     //cout << objIntersectPoint.x << " " << objIntersectPoint.y << " " << objIntersectPoint.z << endl;
     if (abs(objIntersectPoint.x) - 1 < 1e-4) {
         normal = glm::vec3(glm::sign(objIntersectPoint.x), 0, 0);
@@ -50,11 +66,11 @@ bool Cube::isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal) {
     else if (abs(objIntersectPoint.z) - 1 < 1e-4) {
         normal = glm::vec3(0,0,glm::sign(objIntersectPoint.z));
     }
+    normal *= signNormal;
     normal = glm::mat3(glm::transpose(glm::inverse(this->trs)))* normal;
-    // convert back to world space
-     glm::vec3 intersectPoint = glm::vec3(this->trs * glm::vec4(objIntersectPoint, 1.0f));
-    //distance = (intersectPoint-ray.origin).length();
-    tNear = _tNear;
-    tFar = _tFar;
+    
+  
+    
+
     return true;
 }

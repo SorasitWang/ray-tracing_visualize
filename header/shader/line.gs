@@ -1,6 +1,6 @@
 #version 330 core
 layout (points) in;
-layout (line_strip, max_vertices = 2) out;
+layout (triangle_strip, max_vertices = 4) out;
 
 in VS_OUT {
     vec3 color;
@@ -9,13 +9,27 @@ in VS_OUT {
 } gs_in[];
 
 out vec3 fColor;
-
+uniform float lineWidth;
 void main() {    
    
+   
     fColor = gs_in[0].color; 
-    gl_Position = gs_in[0].startPos ;
+
+    vec2 dir = normalize(gs_in[0].endPos.xy - gs_in[0].startPos.xy);
+    vec2 normal = vec2(-dir.y,dir.x) * lineWidth/2.0;
+
+    gl_Position = gs_in[0].startPos + vec4(normal, 0.0, 0.0);
     EmitVertex();   
-    gl_Position = gs_in[0].endPos ;
+
+    gl_Position = gs_in[0].startPos - vec4(normal, 0.0, 0.0);
     EmitVertex();
+
+    gl_Position = gs_in[0].endPos + vec4(normal, 0.0, 0.0);
+    EmitVertex();   
+
+    gl_Position = gs_in[0].endPos - vec4(normal, 0.0, 0.0);
+    EmitVertex();
+
+
     EndPrimitive();
 }

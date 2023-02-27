@@ -24,6 +24,7 @@ bool Object::isIntersectAABB(Ray ray,float &tNear, float &tFar) {
 	// no intersection means vec.x > vec.y (really tNear > tFar)
 	glm::vec3 tMin = (this->min - ray.origin) / ray.dir;
 	glm::vec3 tMax = (this->max - ray.origin) / ray.dir;
+
 	glm::vec3 t1 = glm::min(tMin, tMax);
 	glm::vec3 t2 = glm ::max(tMin, tMax);
 	tNear = std::max(std::max(t1.x, t1.y), t1.z);
@@ -34,6 +35,7 @@ bool Object::isIntersectAABB(Ray ray,float &tNear, float &tFar) {
 
 bool Object::isInsideAABB(glm::vec3 pos)
 {
+	
 	const float Epsilon = 1e-6;
 	if (pos.x > this->min.x - Epsilon && pos.x <  this->max.x + Epsilon &&
 		pos.y > this->min.y - Epsilon && pos.y <  this->max.y + Epsilon &&
@@ -44,7 +46,7 @@ bool Object::isInsideAABB(glm::vec3 pos)
 	return false;
 }
 
-void Object::setMaterial(string type,glm::vec3 val) {
+void Object::setMaterial(string type,const glm::vec3& val) {
 	if (type == "ambient") {
 		this->material.ambient = val;
 	}
@@ -52,7 +54,12 @@ void Object::setMaterial(string type,glm::vec3 val) {
 		this->material.diffuse = val;
 	}
 	else if (type == "specular") {
+		this->material.specular = val;
+	}
+	else if (type == "all") {
 		this->material.ambient = val;
+		this->material.diffuse = val;
+		this->material.specular = val;
 	}
 }
 void Object::setMaterial(string type, float val) {
@@ -103,8 +110,9 @@ void Object::setPhongUniform(const vector<PointLight*>* pointLights,const glm::v
 	this->shader->setMat4("model", this->trs);
 }
 
-void Object::drawPhong(const vector<PointLight*>* pointLights, const glm::vec3& viewPos, const glm::mat4& projection, const glm::mat4& view) {
+void Object::drawPhong(const vector<PointLight*>* pointLights, const glm::vec3& viewPos, const glm::mat4& projection, const glm::mat4& view,bool drawShadow) {
 	this->setPhongUniform(pointLights, viewPos, projection, view);
+	this->shader->setBool("drawShadow", drawShadow);
 	this->draw();
 }
 
@@ -118,18 +126,21 @@ void Object::drawDepth(const PointLight* light) {
 		light->depthShader->setFloat("farPlane", light->farPlane);
 		this->draw();
 }
-
-bool Object::isIntersectFiltered(Ray ray, float& distance, glm::vec3& normal) {
-	glm::vec3 tmpNormal;
+/*
+bool isIntersectFiltered(Ray ray, float& distance, glm::vec3& normal) {
+	glm::vec3 nearNormal,farNormal;
 	float tNear, tFar;
-	if (this->isIntersect(ray, tNear, tFar, tmpNormal)) {
+	if (this->isIntersect(ray, tNear, tFar, nearNormal,farNormal)) {
 		// from surface to outside or to inside
 		if (abs(tNear) < 1e-4 || abs(tFar) < 1e-4) {
 			if (abs(tFar) < 1e-4) {
+				
 				return false;
 			}
 			// inside
 			else {
+				//if (abs(tNear) < 1e-4)
+				//	tmpNormal *= -1.0f;
 				distance = tFar;
 			}
 
@@ -141,5 +152,6 @@ bool Object::isIntersectFiltered(Ray ray, float& distance, glm::vec3& normal) {
 		normal = tmpNormal;		
 		return true;
 	}
+
 	return false;
-}
+}*/

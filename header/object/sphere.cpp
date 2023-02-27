@@ -151,7 +151,7 @@ void Sphere::draw() {
     glBindVertexArray(0);
 }
 
-bool Sphere::isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal) {
+bool Sphere::isIntersect(Ray ray, float& distance, glm::vec3& normal) {
     Ray objRay(glm::vec3(this->invTrs * glm::vec4(ray.origin, 1.0f)), glm::vec3(this->invTrs * glm::vec4(ray.dir, 0.0f)));
 
     float _tNear, _tFar;
@@ -168,6 +168,7 @@ bool Sphere::isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal) 
 
     // If tca is negative, the sphere is behind the ray origin and therefore there is no intersection
     if (tca < 0) {
+        //cout << tca << endl;
         return false;
     }
 
@@ -177,6 +178,7 @@ bool Sphere::isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal) 
     float radius2 = this->radius * this->radius;
     // If the distance is greater than the sphere radius, the ray does not intersect the sphere
     if (d2 > radius2) {
+        //cout << d2 << endl;
         return false;
     }
 
@@ -185,8 +187,28 @@ bool Sphere::isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal) 
 
     // convert back to world space
     //intersectPoint = glm::vec3(this->trs * glm::vec4(intersectPoint, 1.0f));
-    tNear = (tca - thc);
-    tFar = (tca + thc);
-    normal = glm::normalize(objRay.origin + objRay.dir * tNear);
+    float tNear = (tca - thc);
+    float tFar = (tca + thc);
+    int signNormal = 1;
+   
+    if (abs(tNear) < 1e-4 || abs(tFar) < 1e-4) {
+        if (abs(_tFar) < 1e-4) {
+            return false;
+        }
+        // inside
+        else {
+            distance = tFar;
+            signNormal = -1;
+        }
+    }
+    else
+    {
+        distance = tNear;
+    }
+
+    normal = glm::normalize(objRay.origin + objRay.dir * distance);
+    normal *= signNormal;
+    normal = glm::mat3(glm::transpose(glm::inverse(this->trs))) * normal;
+    
     return true;
 }

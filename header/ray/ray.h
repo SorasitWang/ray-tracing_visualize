@@ -9,13 +9,13 @@
 #include <glm/glm/gtc/type_ptr.hpp>
 #include <string>
 #include "../shader.h"
-
+#include "../util.h"
 using namespace std;
 class Ray
 {
 public :
 	glm::vec3 origin, dir;
-	float tMax, drawStep;
+	float tMax, drawStep,lineWidth;
 	unsigned int VAO, VBO;
 	Shader* shader;
 	vector<float> vertexData;
@@ -32,6 +32,7 @@ public :
 		this->tMax = 10.0f;
 		this->color = glm::vec3(1.0f);
 		this->drawStep = 0.0f;
+		this->lineWidth = 0.04f;
 		this->genVertexData(this->drawStep);
 		
 		

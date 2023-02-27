@@ -1,10 +1,14 @@
 #include "tracingRay.h"
 
+
+int TracingRay::MAX_TRACING = 5;
 glm::vec3 TracingRay::computePhong(const PointLight& light, const Object& object, glm::vec3 normal, glm::vec3 fragPos, glm::vec3 viewDir) {
 
+	
 	glm::vec3 lightDir = normalize(light.position - fragPos);
 	// diffuse shading
-	float diff = std::max(glm::dot(normal, lightDir), 0.0f);
+	//float diff = std::max(glm::dot(normal, lightDir), 0.0f);
+	float diff = abs(glm::dot(normal, lightDir));
 	// specular shading
 	glm::vec3 reflectDir = reflect(-lightDir, normal);
 	float spec = pow(std::max(dot(viewDir, reflectDir), 0.0f), object.material.shininess);
@@ -35,24 +39,31 @@ glm::vec3 TracingRay::trace(const vector<Object*>& objects, const vector<PointLi
 	for (Object* obj : objects) {
 		float dis = 0, tFar = 0;
 		glm::vec3 tmpNormal;
-		if (obj->isIntersectFiltered(*this, dis, normal)) {
+		if (obj->isIntersect(*this, dis, tmpNormal) && dis < minDis) {
 			intersected = obj;
 			minDis = dis;
+			normal = tmpNormal;
+		}
+		else {	
 		}
 	}
+		
 	if (intersected == nullptr) {
 		this->color = glm::vec3(1);
 	}
 	else {
+		
 		this->isIntersect = true;
 		glm::vec3 intersectedPoint = this->origin + this->dir * minDis;
+		//cout << Util::vec3ToString(intersectedPoint) << " , " << Util::vec3ToString(normal) << endl;
+		//cout << Util::vec3ToString(intersectedPoint) << endl;
 		// trace more rays		
-		if (this->level <= 0) {
+		if (this->level < TracingRay::MAX_TRACING) {
 			if (intersected->material.reflectCoeff != 0.0f) {
 				glm::vec3 reflectDir = glm::reflect(this->dir, normal);
 				TracingRay* relfectRay = new TracingRay(this, this->level + 1, intersectedPoint, reflectDir);
 				reflectColor = relfectRay->trace(objects, lights, viewPos, projection, view, step);
-				//cout << Util::vec3ToString(reflectDir) << " | " << Util::vec3ToString(intersectedPoint)<< endl;
+				//cout << this->level << " : " <<  Util::vec3ToString(intersectedPoint) << " | " << Util::vec3ToString(reflectDir) << " | " << Util::vec3ToString(normal) << endl;
 			}
 			if (intersected->material.refractCoeff != 0.0f) {
 				// air index is 1
@@ -64,7 +75,7 @@ glm::vec3 TracingRay::trace(const vector<Object*>& objects, const vector<PointLi
 				glm::vec3 refractDir = Ray::refractRay(this->dir, normal, this->mediumIndex, index);
 				TracingRay* refractRay = new TracingRay(this, this->level + 1, intersectedPoint, refractDir, intersected->material.index);
 				refractColor = refractRay->trace(objects, lights, viewPos, projection, view, step);
-				//cout << Util::vec3ToString(this->dir) << " " << Util::vec3ToString(glm::normalize(refractDir)) << " " << Util::vec3ToString(glm::normalize(normal))<<  endl;
+				//cout << this->level << " : " << Util::vec3ToString(this->dir) << " " << Util::vec3ToString(glm::normalize(refractDir)) << " " << Util::vec3ToString(glm::normalize(normal)) << endl;
 			}
 		}
 
@@ -81,7 +92,7 @@ glm::vec3 TracingRay::trace(const vector<Object*>& objects, const vector<PointLi
 			else {
 				lightRay->setColor(glm::vec3(0.3f));
 			}
-			lightRay->draw(projection, view, step);
+			lightRay->draw(projection, view, step,0.3f);
 
 		}
 		if (underShadow) {
@@ -100,14 +111,14 @@ glm::vec3 TracingRay::trace(const vector<Object*>& objects, const vector<PointLi
 }
 
 
-bool TracingRay::canReach(Ray ray, const vector<Object*>& objects, glm::vec3& terminal, Object* ignoreObj) {
+bool TracingRay::canReach(Ray& ray, const vector<Object*>& objects, glm::vec3& terminal, Object* ignoreObj) {
 	float terminalDist = glm::length(terminal - ray.origin);
 	for (Object* obj : objects) {
 		//if (obj == ignoreObj)continue;
 		float tNear,tFar;
 		glm::vec3 tmpNormal;
 		// ignore object that it intersect
-		if (obj->isIntersectFiltered(ray, tNear, tmpNormal))
+		if (obj->isIntersect(ray, tNear, tmpNormal))
 			return false;
 	}
 	ray.setTMax(terminal);
@@ -126,6 +137,7 @@ void TracingRay::draw(const glm::mat4& projection, const glm::mat4& view, float 
 	this->shader->setMat4("view", view);
 	this->shader->setMat4("projection", projection);
 	this->shader->setFloat("transparency", trans);
+	this->shader->setFloat("lineWidth", this->lineWidth);
 	this->VAO = 0;
 	this->genVertexData(drawStep);
 	glBindVertexArray(this->VAO);

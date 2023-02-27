@@ -22,7 +22,7 @@ void draw();
 void deleteAll();
 // settings
 const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_HEIGHT = 800;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
@@ -34,7 +34,9 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float step = 0.0f;
+int scene = 2;
 
+glm::vec3 dummyCameraPos;
 vector<Object*> objs;
 vector<PointLight*> lights;
 TracingRay* ray;
@@ -61,6 +63,8 @@ int main()
         glfwTerminate();
         return -1;
     }
+    //camera.Position = glm::vec3(-7.55,1.42,10.93);
+    //camera.ProcessMouseMovement(400, 0);
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
@@ -82,35 +86,84 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  
+    // normal scene
+    if (scene == 0) {
+        dummyCameraPos = glm::vec3(3, 0.5, 0);
 
-    Cube* cube = new Cube();
-    Cube* cube2 = new Cube();
-    Sphere* sphere = new Sphere();
-    PointLight* pointLight = new PointLight(glm::vec3(6));
-    PointLight* pointLight2 = new PointLight(glm::vec3(3,2,0));
-    pointLight2->setLightProp(glm::vec3(50,100,50), glm::vec3(50, 100, 50), glm::vec3(50, 100, 50));
-    glm::mat4 t = glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.5, 0));
-    glm::mat4 r = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 1));
-    glm::mat4 s(1.0f);
-    //cube->updateTransformMatrix(t, r, s);
-    cube->setMaterial("reflectCoeff", 0.3f);
-    cube->setMaterial("index", 1.9f);
-    cube->setMaterial("refractCoeff", 0.3f);
-    t = glm::translate(glm::mat4(1.0f), pointLight->position);
-    cube2->updateTransformMatrix(t, glm::mat4(1.0f), glm::mat4(1.0f));
-    
-    objs.push_back(cube);
-    //objs.push_back(cube2);
-    
-    //lights.push_back(pointLight);
-    lights.push_back(pointLight2);
+        Cube* cube = new Cube();
+        Cube* cube2 = new Cube();
+        Sphere* sphere = new Sphere();
+        PointLight* pointLight = new PointLight(glm::vec3(6));
+        PointLight* pointLight2 = new PointLight(glm::vec3(3, 2, 0));
+        pointLight2->setLightProp(glm::vec3(10, 20, 10), glm::vec3(50, 100, 50), glm::vec3(10, 20, 10));
+        glm::mat4 t = glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.5, 0));
+        glm::mat4 r = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 1));
+        glm::mat4 s(1.0f);
+        //cube->updateTransformMatrix(t, r, s);
+        cube->setMaterial("reflectCoeff", 0.3f);
+        cube->setMaterial("index", 1.9f);
+        cube->setMaterial("refractCoeff", 0.3f);
+        t = glm::translate(glm::mat4(1.0f), pointLight->position);
+        cube2->updateTransformMatrix(t, glm::mat4(1.0f), glm::mat4(1.0f));
+
+        objs.push_back(cube);
+        //objs.push_back(cube2);
+        // 
+        //lights.push_back(pointLight);
+        lights.push_back(pointLight2);
+        ray = new TracingRay(nullptr, 0, dummyCameraPos, glm::vec3(-1, -0.1f, 0));
+    }
+    else if (scene == 1) {
+        dummyCameraPos = glm::vec3(3, 0, 0);
+
+        Quad* mir1 = new Quad();
+        mir1->setMaterial("reflectCoeff", 0.75f);
+        mir1->updateTransformMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0,0,-0.)), glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 0)), glm::mat4(1.0f));
+        objs.push_back(mir1);
+        
+        Quad* mir2 = new Quad();
+        mir2->setMaterial("reflectCoeff", 0.75f);
+        mir2->updateTransformMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(-0.25f, 0, 4)), glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 0)), glm::mat4(1.0f));
+        mir2->setMaterial("all", glm::vec3(0.0f, 0.6f, 0.9f));
+        objs.push_back(mir2);
+
+        Quad* mir3 = new Quad();
+        mir3->setMaterial("reflectCoeff", 0.75f);
+        mir3->updateTransformMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(-4, 0, 4)), glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 0)), glm::mat4(1.0f));
+        mir3->setMaterial("all", glm::vec3(0.0f, 0.9f, 0.1f));
+        objs.push_back(mir3);
+
+        Quad* wall = new Quad();
+        wall->updateTransformMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(-4.0f, 0,8)), glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 1, 0)), glm::mat4(1.0f));
+        wall->setMaterial("all", glm::vec3(0.8f, 0.8f, 0.4f));
+        objs.push_back(wall);
+        
+        PointLight* pointLight2 = new PointLight(glm::vec3(-2, 2, 4));
+        pointLight2->setLightProp(glm::vec3(10, 10, 10), glm::vec3(100, 100, 100), glm::vec3(10, 10, 10));
+        lights.push_back(pointLight2);
+        ray = new TracingRay(nullptr, 0, dummyCameraPos, glm::vec3(-1, 0, 0));
+
+        float distance;
+        glm::vec3 normal;
+        float tNear, tFar;
 
 
-    ray = new TracingRay(nullptr,0,glm::vec3(10,0.5,0),glm::vec3(-1,-0.1,0));
-    //TracingRay::setMaxLevel(1);
-   /* unsigned int depthMapFBO;
-    glGenFramebuffers(1, &depthMapFBO);
-    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;*/
+        //cout << is << " " << tNear << " " <<tFar << endl;
+    }
+    else if (scene == 2) {
+        dummyCameraPos = glm::vec3(3, 0, 0);
+        Sphere* sphere = new Sphere();
+        sphere->setMaterial("reflectCoeff", 0.4f);
+        sphere->setMaterial("refractCoeff", 0.4f);
+        sphere->setMaterial("index", 1.9f);
+        sphere->setMaterial("all", glm::vec3(0.0f, 0.5f, 0.2f));
+
+        PointLight* pointLight = new PointLight(glm::vec3(3, 2, -5));
+        lights.push_back(pointLight);
+        ray = new TracingRay(nullptr, 0, dummyCameraPos, glm::vec3(-0.9, -0.3f, 0.1f));
+        objs.push_back(sphere);
+    }
 
     while (!glfwWindowShouldClose(window))
     {
@@ -124,7 +177,7 @@ int main()
         // -----
         processInput(window);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(0.f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         for (PointLight* light : lights) {
             depthMaps.push_back(light->renderDepthMap());
@@ -132,7 +185,7 @@ int main()
                obj->drawDepth(light);
            }
         }
-        
+        //cout << Util::vec3ToString(camera.Position) << endl;
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         for (unsigned int i = 0; i < lights.size(); i++) {
             glActiveTexture(GL_TEXTURE0+i);
@@ -142,7 +195,7 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    //deleteAll();
+    deleteAll();
     glfwTerminate();
     return 0;
 }
@@ -205,23 +258,28 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 void draw() {
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     glm::mat4 view = camera.GetViewMatrix();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     for (Object* obj : objs) {
         obj->drawPhong(&lights, camera.Position, projection, view);
     }
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     for (PointLight* light : lights)
         light->draw(projection, view);
     /*sphere->draw(projection, view);*/
-    ray->trace(objs, lights, camera.Position, projection, view,step);
+    ray->trace(objs, lights, dummyCameraPos, projection, view,step);
+    //cout << Util::vec3ToString(camera.Position) << endl;
 }
 
 void deleteAll() {
-   for (unsigned int i = 0; i < objs.size();i++) {
-        delete objs[i];
-   }
-
-   for (unsigned int i = 0; i < lights.size(); i++) {
-       delete lights[i];
-   }
-   delete ray;
+   
+  
+   for (auto obj : objs)
+        delete obj;
+    objs.clear();
+    
+    for (auto light : lights)
+        delete light;
+    lights.clear();
+    delete ray; 
 
 }

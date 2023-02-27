@@ -57,7 +57,7 @@ in vec4 FragPosLightSpaces[10];
 out vec4 FragColor;
  
 # define MAX_POINT_LIGHTS 4  
-
+uniform bool drawShadow;
 uniform int numPointLight;
 // for now, just consider only point light
 uniform samplerCube shadowMaps[MAX_POINT_LIGHTS];
@@ -128,7 +128,9 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir,in
     ambient  *= attenuation;
     diffuse  *= attenuation;
     specular *= attenuation;
-    float shadow = ShadowCubeCalculation(FragPosLightSpaces[lightIndex],shadowMaps[lightIndex],lightPos[lightIndex]);    
+    float shadow = 0;
+    if (drawShadow)
+        shadow = ShadowCubeCalculation(FragPosLightSpaces[lightIndex],shadowMaps[lightIndex],lightPos[lightIndex]);    
     return (ambient + (diffuse + specular))*(1-shadow);
 } 
 

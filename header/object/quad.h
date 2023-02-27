@@ -3,14 +3,14 @@
 
 #include "object.h"
 
-class Quad : private Object {
+class Quad : public Object {
 
 public:
 	Quad() : Object() {
 		this->genVertexData();
 	};
 	~Quad() {};
-	virtual bool isIntersect(Ray ray, float& tNear, float& tFar, glm::vec3& normal);
+	virtual bool isIntersect(Ray ray, float& distance, glm::vec3& normal);
 	void draw();
 	string hello() {
 		return "quad";

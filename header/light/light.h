@@ -13,9 +13,9 @@
 using namespace std;
 
 struct LightProperty {
-	glm::vec3 ambient = glm::vec3(10.0f, 10.0f, 10.0f);;
-	glm::vec3 diffuse = glm::vec3(100.0f, 100.0f, 100.0f);;
-	glm::vec3 specular = glm::vec3(10.0f, 10.0f, 10.0f);;
+	glm::vec3 ambient = glm::vec3(5.0f, 5.0f, 5.0f);;
+	glm::vec3 diffuse = glm::vec3(10.0f, 10.0f, 10.0f);;
+	glm::vec3 specular = glm::vec3(5.0f, 5.0f, 5.0f);;
 };
 
 class Light

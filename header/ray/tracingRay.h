@@ -24,9 +24,12 @@ public:
 		this->mediumIndex = index;
 	}
 	void draw(const glm::mat4& projection, const glm::mat4& view, float step, float trans=1.0f);
-	bool canReach(Ray ray, const vector<Object*>& objects, glm::vec3& terminal, Object* ignoreObj);
+	bool canReach(Ray& ray, const vector<Object*>& objects, glm::vec3& terminal, Object* ignoreObj);
 	glm::vec3 trace(const vector<Object*>& objects, const vector<PointLight*>& lights,glm::vec3& viewPos,const glm::mat4& projection,const glm::mat4& view,float step) ;
 	glm::vec3 computePhong(const PointLight& light, const Object& object, glm::vec3 normal, glm::vec3 fragPos, glm::vec3 viewDir);
+
+private :
+	static int MAX_TRACING;
 };
 
 #endif 
